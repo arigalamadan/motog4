@@ -1,0 +1,100 @@
+
+
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="MyTask" basedir="." default="build">
+    <property file="build.properties"/>
+
+    <target name="init">
+        <delete dir="${build.dir}"/>
+        <mkdir dir="${build.dir}"/>
+        <mkdir dir="${build.dir}/classes"/>
+        <echo message="Loading ANT Tool"/>
+        <echo message="Basedir is ${basedir}"/>
+        <echo message="Antlib is ${ant.library.dir}"/>
+
+<taskdef resource="com/worklight/ant/defaults.properties">
+            <classpath>
+            <pathelement location="${ant.library.dir}/worklight-   ant.jar"/>
+            </classpath>
+        </taskdef>
+   <target name="myTestTarget">
+    <app-builder
+        worklightserverhost="http://localhost:10080/demoproject"
+        applicationFolder="apps/demoapp"
+        environments="android,iphone"
+        nativeProjectPrefix="demoproject"
+        outputFolder="~/Desktop"/>
+  </target> 
+    <target name="build" depends="init, warBuilder,appBuilder">
+        <echo message="Build Target Complete"/>
+    </target>
+    <target name="warBuilder">
+        <echo message="Building the war file"/>
+<war-builder projectfolder="${basedir}" destinationfolder="${build.dir}"
+<warfile="${build.dir}/${war.file.name}" classesFolder="${build.classes.dir}"/>
+
+<echo message="Updating the war file with worklight server configurations"/>
+        <war destfile="${build.dir}/${war.file.name}" update="true">
+            <webinf dir="${build.files.dir}" includes="i*.xml"/>
+        </war>
+    </target>
+
+<target name='appBuilder' >
+        <echo message="Building the App"/>
+<app-builder applicationFolder="${apps.dir}" outputfolder="${build.dir}"
+worklightServerHost="${WLSERVERHOST}"/>
+            </target>
+
+
+<target name='buildAllAdapters'>
+        <taskdef resource="net/sf/antcontrib/antlib.xml">
+            <classpath>
+            <pathelement location="${ant.library.dir}/ant-contrib-0.6.jar"/>
+            </classpath>
+        </taskdef>
+
+        <echo message="Building all adpaters"/>
+    <foreach target="adapterBuilder" param="adapterDirectory" inheritall="true">
+            <path>
+                <dirset dir="${adapters.dir}">
+                    <include name="*"/>
+                </dirset>
+            </path>
+        </foreach>
+    </target>
+    <target name="adapterBuilder">
+        <echo message="Building adapters in folder ${adapterDirectory}"/>
+    <adapter-builder folder="${adapterDirectory}" destinationfolder="${build.dir}"/>
+    </target>
+
+    <target name="appDeployer">
+        <echo message="Deploying app ${appFile}"/>
+    <app-deployer worklightServerHost="${WLSERVERHOST}" deployable="${appFile}"/>
+    </target>
+    <target name='deployAllAdapters'>
+        <taskdef resource="net/sf/antcontrib/antlib.xml">
+            <classpath>
+        <pathelement location="${ant.library.dir}/ant-contrib-0.6.jar"/>
+            </classpath>
+        </taskdef>
+
+        <echo message="Deploying all adpaters"/>
+        <foreach target="adapterDeployer" param="adapterFile" inheritall="true">
+            <path>
+                <fileset dir="${build.dir}">
+                    <include name="*.adapter"/>
+                </fileset>
+            </path>
+        </foreach>
+    </target>
+
+</project>
+
+#######################################################################
+
+<app-builder
+    worklightServerHost="http://server-address:port"
+    applicationFolder="adapter-source-files-folder"
+    environments="list-of-environments"
+    nativeProjectPrefix="project-name"
+    outputFolder="output-folder"/>
